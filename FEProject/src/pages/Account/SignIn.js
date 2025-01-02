@@ -83,9 +83,11 @@ const SignIn = () => {
           } else if (response.data.role === "mod") {
             navigate("/mod");
           }
+        } else if (response.status === 401) {
+          setError("Wrong password or email");
         }
       } catch (error) {
-        setError("Login failed. Please check your email or password");
+        alert("Login failed. Please check your email or password");
       }
     }
   };
