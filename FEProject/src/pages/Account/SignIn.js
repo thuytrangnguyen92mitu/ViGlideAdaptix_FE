@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { BsCheckCircleFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { logoLight } from "../../assets/images";
+import axiosInstance from "../../utils/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const SignIn = () => {
   // ============= Initial State Start here =============
@@ -11,6 +13,8 @@ const SignIn = () => {
   // ============= Error Msg Start here =================
   const [errEmail, setErrEmail] = useState("");
   const [errPassword, setErrPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   // ============= Error Msg End here ===================
   const [successMsg, setSuccessMsg] = useState("");
@@ -24,7 +28,7 @@ const SignIn = () => {
     setErrPassword("");
   };
   // ============= Event Handler End here ===============
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
 
     if (!email) {
@@ -36,11 +40,53 @@ const SignIn = () => {
     }
     // ============== Getting the value ==============
     if (email && password) {
-      setSuccessMsg(
-        `Hello dear, Thank you for your attempt. We are processing to validate your access. Till then stay connected and additional assistance will be sent to you by your mail at ${email}`
-      );
-      setEmail("");
-      setPassword("");
+      // setSuccessMsg(
+      //   `Hello dear, Thank you for your attempt. We are processing to validate your access. Till then stay connected and additional assistance will be sent to you by your mail at ${email}`
+      // );
+      // setEmail("");
+      // setPassword("");
+      if (localStorage.getItem("loggedInUser")) {
+        setError(
+          "Another account has been logged in. Please log out to log in this account"
+        );
+        return;
+      }
+      try {
+        const response = await axiosInstance.post(
+          "customer/login",
+          {
+            email: email,
+            password: password,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        );
+        if (response.status === 200) {
+          setSuccessMsg("Login successfully");
+          const userData = {
+            token: response.data.token,
+            customerId: response.data.customerId,
+            cartId: response.data.cartId,
+            role: response.data.role,
+          };
+          localStorage.setItem("loggedInUser", JSON.stringify(userData));
+          localStorage.setItem("token", response.data.token);
+          const expirationTime = new Date().getTime() + 1440 * 60 * 1000;
+          localStorage.setItem("expirationTime", expirationTime);
+
+          if (response.data.role === "customer") {
+            navigate("/");
+          } else if (response.data.role === "mod") {
+            navigate("/mod");
+          }
+        }
+      } catch (error) {
+        setError("Login failed. Please check your email or password");
+      }
     }
   };
   return (
@@ -62,11 +108,10 @@ const SignIn = () => {
             </span>
             <p className="text-base text-gray-300">
               <span className="text-white font-semibold font-titleFont">
-                Get started fast with OREBI
+                Get started fast with ViGlideAdaptix
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
+              Lorem ipsum, dolor sit amet consectetur adipisicing elit.
             </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
@@ -75,7 +120,7 @@ const SignIn = () => {
             </span>
             <p className="text-base text-gray-300">
               <span className="text-white font-semibold font-titleFont">
-                Access all OREBI services
+                Access all our services
               </span>
               <br />
               Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
@@ -98,7 +143,7 @@ const SignIn = () => {
           <div className="flex items-center justify-between mt-10">
             <Link to="/">
               <p className="text-sm font-titleFont font-semibold text-gray-300 hover:text-white cursor-pointer duration-300">
-                © OREBI
+                © VIGLIDEADAPTIX
               </p>
             </Link>
             <p className="text-sm font-titleFont font-semibold text-gray-300 hover:text-white cursor-pointer duration-300">
@@ -129,7 +174,10 @@ const SignIn = () => {
             </Link>
           </div>
         ) : (
-          <form className="w-full lgl:w-[450px] h-screen flex items-center justify-center">
+          <form
+            method="post"
+            className="w-full lgl:w-[450px] h-screen flex items-center justify-center"
+          >
             <div className="px-6 py-4 w-full h-[90%] flex flex-col justify-center overflow-y-scroll scrollbar-thin scrollbar-thumb-primeColor">
               <h1 className="font-titleFont underline underline-offset-4 decoration-[1px] font-semibold text-3xl mdl:text-4xl mb-4">
                 Sign in
@@ -138,7 +186,7 @@ const SignIn = () => {
                 {/* Email */}
                 <div className="flex flex-col gap-.5">
                   <p className="font-titleFont text-base font-semibold text-gray-600">
-                    Work Email
+                    Email
                   </p>
                   <input
                     onChange={handleEmail}
