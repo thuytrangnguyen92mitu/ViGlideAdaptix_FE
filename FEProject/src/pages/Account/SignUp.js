@@ -148,11 +148,11 @@ const SignUp = () => {
             </span>
             <p className="text-base text-gray-300">
               <span className="text-white font-semibold font-titleFont">
-                Get started fast with OREBI
+              Get started fast with ViGlideAdaptix
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
+              Sign up today to explore our AI-integrated suspension systems 
+              that enhance your driving comfort and performance.
             </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
@@ -161,11 +161,11 @@ const SignUp = () => {
             </span>
             <p className="text-base text-gray-300">
               <span className="text-white font-semibold font-titleFont">
-                Access all OREBI services
+              Access all our services
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
+              Create an account to unlock exclusive benefits, accumulate reward points, 
+              and receive early notifications on special promotions and offers tailored just for you!
             </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
@@ -177,8 +177,8 @@ const SignUp = () => {
                 Trusted by online Shoppers
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
+              Join thousands of satisfied customers who trust ViGlideAdaptix
+              for innovative suspension solutions and enjoy a smooth, secure shopping experience.
             </p>
           </div>
           <div className="flex items-center justify-between mt-10">
