@@ -13,15 +13,43 @@ const HeaderBottom = () => {
   const [showUser, setShowUser] = useState(false);
   const navigate = useNavigate();
   const ref = useRef();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
-    document.body.addEventListener("click", (e) => {
-      if (ref.current.contains(e.target)) {
-        setShow(true);
-      } else {
-        setShow(false);
+    // document.body.addEventListener("click", (e) => {
+    //   if (ref.current.contains(e.target)) {
+    //     setShow(true);
+    //   } else {
+    //     setShow(false);
+    //   }
+    // });
+    //Check if customer is loggedIn
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (user && user.token) {
+      setIsLoggedIn(true);
+    }
+
+    const handelStorageChange = () => {
+      const newUser = JSON.parse(localStorage.getItem("loggedInUser"));
+      if (!newUser || !newUser.token) {
+        setIsLoggedIn(false);
+        navigate("/signin");
       }
-    });
-  }, [show, ref]);
+    };
+    window.addEventListener("storage", handelStorageChange);
+    return () => {
+      window.removeEventListener("storage", handelStorageChange);
+    };
+  }, [navigate]);
+  // [show, ref]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("token");
+    localStorage.removeItem("expirationTime");
+    setIsLoggedIn(false);
+    window.location.reload(); // Reload the page to update UI
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -142,6 +170,44 @@ const HeaderBottom = () => {
                 transition={{ duration: 0.5 }}
                 className="absolute top-6 left-0 z-50 bg-primeColor w-44 text-[#767676] h-auto p-4 pb-6"
               >
+                {isLoggedIn ? (
+                  <>
+                    <Link to="/profile">
+                      <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
+                        Profile
+                      </li>
+                    </Link>
+                    <li
+                      onClick={handleLogout}
+                      className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer"
+                    >
+                      Sign Out
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/signin">
+                      <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
+                        Login
+                      </li>
+                    </Link>
+                    <Link to="/signup">
+                      <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
+                        Sign Up
+                      </li>
+                    </Link>
+                  </>
+                )}
+              </motion.ul>
+            )}
+
+            {/* {showUser && (
+              <motion.ul
+                initial={{ y: 30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-6 left-0 z-50 bg-primeColor w-44 text-[#767676] h-auto p-4 pb-6"
+              >
                 <Link to="/signin">
                   <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
                     Login
@@ -159,7 +225,7 @@ const HeaderBottom = () => {
                   Others
                 </li>
               </motion.ul>
-            )}
+            )} */}
             <Link to="/cart">
               <div className="relative">
                 <FaShoppingCart />
