@@ -111,8 +111,8 @@ const SignIn = () => {
                 Get started fast with ViGlideAdaptix
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-            </p>
+              Sign up today to explore our AI-integrated suspension systems that enhance your driving comfort and performance.
+              </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
             <span className="text-green-500 mt-1">
@@ -123,8 +123,8 @@ const SignIn = () => {
                 Access all our services
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
+              Create an account to unlock exclusive benefits, accumulate reward points, 
+              and receive early notifications on special promotions and offers tailored just for you!
             </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
@@ -136,8 +136,8 @@ const SignIn = () => {
                 Trusted by online Shoppers
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
+              Join thousands of satisfied customers who trust ViGlideAdaptix
+              for innovative suspension solutions and enjoy a smooth, secure shopping experience.
             </p>
           </div>
           <div className="flex items-center justify-between mt-10">
