@@ -6,32 +6,22 @@ const Price = () => {
     {
       _id: 950,
       priceOne: 0.0,
-      priceTwo: 49.99,
+      priceTwo: 125.00,
     },
     {
       _id: 951,
-      priceOne: 50.0,
-      priceTwo: 99.99,
+      priceOne: 126.00,
+      priceTwo: 291.00,
     },
     {
       _id: 952,
-      priceOne: 100.0,
-      priceTwo: 199.99,
+      priceOne: 292.00,
+      priceTwo: 500.00,
     },
     {
       _id: 953,
-      priceOne: 200.0,
-      priceTwo: 399.99,
-    },
-    {
-      _id: 954,
-      priceOne: 400.0,
-      priceTwo: 599.99,
-    },
-    {
-      _id: 955,
-      priceOne: 600.0,
-      priceTwo: 1000.0,
+      priceOne: 501.00,
+      priceTwo: 1300.00,
     },
   ];
   return (
