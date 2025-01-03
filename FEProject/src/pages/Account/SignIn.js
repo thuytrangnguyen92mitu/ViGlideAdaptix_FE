@@ -28,7 +28,7 @@ const SignIn = () => {
     setErrPassword("");
   };
   // ============= Event Handler End here ===============
-  const handleSignUp = async (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
 
     if (!email) {
@@ -36,7 +36,7 @@ const SignIn = () => {
     }
 
     if (!password) {
-      setErrPassword("Create a password");
+      setErrPassword("Enter a password");
     }
     // ============== Getting the value ==============
     if (email && password) {
@@ -83,9 +83,11 @@ const SignIn = () => {
           } else if (response.data.role === "mod") {
             navigate("/mod");
           }
+        } else if (response.status === 401) {
+          setError("Wrong password or email");
         }
       } catch (error) {
-        setError("Login failed. Please check your email or password");
+        alert("Login failed. Please check your email or password");
       }
     }
   };
@@ -111,8 +113,8 @@ const SignIn = () => {
                 Get started fast with ViGlideAdaptix
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-            </p>
+              Sign up today to explore our AI-integrated suspension systems that enhance your driving comfort and performance.
+              </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
             <span className="text-green-500 mt-1">
@@ -123,8 +125,8 @@ const SignIn = () => {
                 Access all our services
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
+              Create an account to unlock exclusive benefits, accumulate reward points, 
+              and receive early notifications on special promotions and offers tailored just for you!
             </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
@@ -136,8 +138,8 @@ const SignIn = () => {
                 Trusted by online Shoppers
               </span>
               <br />
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ab omnis
-              nisi dolor recusandae consectetur!
+              Join thousands of satisfied customers who trust ViGlideAdaptix
+              for innovative suspension solutions and enjoy a smooth, secure shopping experience.
             </p>
           </div>
           <div className="flex items-center justify-between mt-10">
@@ -224,7 +226,7 @@ const SignIn = () => {
                 </div>
 
                 <button
-                  onClick={handleSignUp}
+                  onClick={handleSignIn}
                   className="bg-primeColor hover:bg-black text-gray-200 hover:text-white cursor-pointer w-full text-base font-medium h-10 rounded-md  duration-300"
                 >
                   Sign In
