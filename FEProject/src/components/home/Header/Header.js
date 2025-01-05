@@ -7,31 +7,56 @@ import { logo, logoLight } from "../../../assets/images";
 import Image from "../../designLayouts/Image";
 import { navBarList } from "../../../constants";
 import Flex from "../../designLayouts/Flex";
+import axiosInstance from "../../../utils/axiosInstance"; // Adjust the path as necessary
 
 const Header = () => {
   const [showMenu, setShowMenu] = useState(true);
   const [sidenav, setSidenav] = useState(false);
   const [category, setCategory] = useState(false);
-  const [brand, setBrand] = useState(false);
+  const [categories, setCategories] = useState([]); // Dynamic category list
   const location = useLocation();
+
   useEffect(() => {
-    let ResponsiveMenu = () => {
-      if (window.innerWidth < 667) {
-        setShowMenu(false);
-      } else {
-        setShowMenu(true);
-      }
+    const ResponsiveMenu = () => {
+      setShowMenu(window.innerWidth >= 667);
     };
+
     ResponsiveMenu();
     window.addEventListener("resize", ResponsiveMenu);
+
+    return () => {
+      window.removeEventListener("resize", ResponsiveMenu);
+    };
   }, []);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get("product/category", {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+        if (response.status === 200) {
+          setCategories(response.data);
+          console.log("Fetched categories:", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    if (category && sidenav) {
+      fetchCategories();
+    }
+  }, [sidenav, category]);
 
   return (
     <div className="w-full h-20 bg-white sticky top-0 z-50 border-b-[1px] border-b-gray-200">
       <nav className="h-full px-4 max-w-container mx-auto relative">
         <Flex className="flex items-center justify-between h-full">
           <Link to="/">
-            <div style={{ "margin": '0px 1rem 2px 1rem'}} >
+            <div style={{ margin: "0px 1rem 2px 1rem" }}>
               <Image className="w-20 object-cover" imgSrc={logo} />
             </div>
           </Link>
@@ -43,18 +68,16 @@ const Header = () => {
                 transition={{ duration: 0.5 }}
                 className="flex items-center w-auto z-50 p-0 gap-2"
               >
-                <>
-                  {navBarList.map(({ _id, title, link }) => (
-                    <NavLink
-                      key={_id}
-                      className="flex font-normal hover:font-bold w-20 h-6 justify-center items-center px-12 text-base text-[#767676] hover:underline underline-offset-[4px] decoration-[1px] hover:text-[#262626] md:border-r-[2px] border-r-gray-300 hoverEffect last:border-r-0"
-                      to={link}
-                      state={{ data: location.pathname.split("/")[1] }}
-                    >
-                      <li>{title}</li>
-                    </NavLink>
-                  ))}
-                </>
+                {navBarList.map(({ _id, title, link }) => (
+                  <NavLink
+                    key={_id}
+                    className="flex font-normal hover:font-bold w-20 h-6 justify-center items-center px-12 text-base text-[#767676] hover:underline underline-offset-[4px] decoration-[1px] hover:text-[#262626] md:border-r-[2px] border-r-gray-300 hoverEffect last:border-r-0"
+                    to={link}
+                    state={{ data: location.pathname.split("/")[1] }}
+                  >
+                    <li>{title}</li>
+                  </NavLink>
+                ))}
               </motion.ul>
             )}
             <HiMenuAlt2
@@ -106,34 +129,15 @@ const Header = () => {
                           transition={{ duration: 0.4 }}
                           className="text-sm flex flex-col gap-1"
                         >
-                          <li className="headerSedenavLi">New Arrivals</li>
-                          <li className="headerSedenavLi">Auto Parts</li>
-                          <li className="headerSedenavLi">Package Service</li>
-                          <li className="headerSedenavLi">Register Software</li>
-                          <li className="headerSedenavLi">Others</li>
-                        </motion.ul>
-                      )}
-                    </div>
-                    <div className="mt-4">
-                      <h1
-                        onClick={() => setBrand(!brand)}
-                        className="flex justify-between text-base cursor-pointer items-center font-titleFont mb-2"
-                      >
-                        Shop by Brand
-                        <span className="text-lg">{brand ? "-" : "+"}</span>
-                      </h1>
-                      {brand && (
-                        <motion.ul
-                          initial={{ y: 15, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          transition={{ duration: 0.4 }}
-                          className="text-sm flex flex-col gap-1"
-                        >
-                          <li className="headerSedenavLi">New Arrivals</li>
-                          <li className="headerSedenavLi">Auto Parts</li>
-                          <li className="headerSedenavLi">Package Service</li>
-                          <li className="headerSedenavLi">Register Software</li>
-                          <li className="headerSedenavLi">Others</li>
+                          {categories.length > 0 ? (
+                            categories.map(({ categoryId, categoryName }) => (
+                              <li key={categoryId} className="headerSedenavLi">
+                                {categoryName}
+                              </li>
+                            ))
+                          ) : (
+                            <li>Loading categories...</li>
+                          )}
                         </motion.ul>
                       )}
                     </div>
