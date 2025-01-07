@@ -1,58 +1,102 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
 import Product from "../../home/Products/Product";
-import { paginationItems } from "../../../constants";
-
-const items = paginationItems;
-function Items({ currentItems }) {
-  return (
-    <>
-      {currentItems &&
-        currentItems.map((item) => (
-          <div key={item._id} className="w-full">
-            <Product
-              _id={item._id}
-              img={item.img}
-              productName={item.productName}
-              price={item.price}
-              color={item.color}
-              badge={item.badge}
-              des={item.des}
-            />
-          </div>
-        ))}
-    </>
-  );
-}
+import axiosInstance from "../../../utils/axiosInstance";
 
 const Pagination = ({ itemsPerPage }) => {
-  // Here we use item offsets; we could also use page offsets
-  // following the API or data you're working with.
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [itemOffset, setItemOffset] = useState(0);
-  const [itemStart, setItemStart] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+  const [filters, setFilters] = useState({
+    ProductName: "",
+    CategoryId: 0,
+    BrandId: 0,
+    SortBy: null,
+    IsDecsending: false,
+    PageNumber: 1,
+    PageSize: itemsPerPage,
+  });
 
-  // Simulate fetching items from another resources.
-  // (This could be items from props; or items loaded in a local state
-  // from an API endpoint with useEffect and useState)
-  const endOffset = itemOffset + itemsPerPage;
-  //   console.log(`Loading items from ${itemOffset} to ${endOffset}`);
-  const currentItems = items.slice(itemOffset, endOffset);
-  const pageCount = Math.ceil(items.length / itemsPerPage);
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get("product", { params: filters });
+      const totalRecordsFromAPI = response.data.totalRecords; // Get total records from API
+      const totalPages = Math.ceil(totalRecordsFromAPI / itemsPerPage); // Calculate total pages based on total records and items per page
 
-  // Invoke when user click to request another page.
+      setTotalRecords(totalRecordsFromAPI);
+      setPageCount(totalPages);
+
+      const productData = response.data.data; // Ensure you're accessing the correct property
+      const promises = productData.map(async (product) => {
+        try {
+          const imageResponse = await axiosInstance.get(
+            `product/images?imageName=${product.productImage}`
+          );
+
+          // The response will contain a data URL with the MIME type
+          const imgSrc = imageResponse.data.image;
+          return {
+            productId: product.productId,
+            productImage: imgSrc, // Store the data URL for the image
+            productName: product.productName,
+            unitPrice: product.unitPrice,
+            productDescription: product.productDescription,
+          };
+        } catch (error) {
+          console.error(
+            "Error fetching image for product:",
+            product.productId,
+            error
+          );
+          return { ...product, imgSrc: "" }; // Return product with empty imgSrc on failure
+        }
+      });
+
+      const mappedProducts = await Promise.all(promises);
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [filters]);
+
   const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % items.length;
-    setItemOffset(newOffset);
-    // console.log(
-    //   `User requested page number ${event.selected}, which is offset ${newOffset},`
-    // );
-    setItemStart(newOffset);
+    const newPageNumber = event.selected + 1;
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      PageNumber: newPageNumber,
+    }));
+    setItemOffset((newPageNumber - 1) * filters.PageSize);
   };
 
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 mdl:gap-4 lg:gap-10">
-        <Items currentItems={currentItems} />
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          products.map((item) => (
+            <div key={item.productId} className="w-full">
+              <Product
+                _id={item.productId}
+                img={item.productImage}
+                productName={item.productName}
+                price={item.unitPrice}
+                des={item.productDescription}
+                purchases={item.purchases}
+                ratingScore={item.ratingScore}
+              />
+            </div>
+          ))
+        )}
       </div>
       <div className="flex flex-col mdl:flex-row justify-center mdl:justify-between items-center">
         <ReactPaginate
@@ -67,10 +111,10 @@ const Pagination = ({ itemsPerPage }) => {
           containerClassName="flex text-base font-semibold font-titleFont py-10"
           activeClassName="bg-black text-white"
         />
-
         <p className="text-base font-normal text-lightText">
-          Products from {itemStart === 0 ? 1 : itemStart} to {endOffset} of{" "}
-          {items.length}
+          Products from {itemOffset + 1} to{" "}
+          {Math.min(itemOffset + filters.PageSize, totalRecords)} of{" "}
+          {totalRecords}
         </p>
       </div>
     </div>
