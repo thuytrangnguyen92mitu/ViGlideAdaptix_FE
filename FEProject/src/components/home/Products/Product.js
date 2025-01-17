@@ -11,20 +11,44 @@ import { MdOutlineLabelImportant } from "react-icons/md";
 import Image from "../../designLayouts/Image";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addToCart } from "../../../redux/orebiSlice";
+import { addToCart, incrementCartCount } from "../../../redux/orebiSlice";
+import axiosInstance from "../../../utils/axiosInstance";
 
 const Product = (props) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleProductDetails = () => {
-    navigate(`/product/${props._id}`, {
-      state: {
-        item: props,
-      },
-    });
+  const handleProductDetails = async () => {
+    try {
+      navigate(`/product/${props._id}`, { state: { productId: props._id } });
+    } catch (error) {
+      console.error("Error fetching product details:", error.message);
+    }
   };
-  console.log("imgSrc:", props.img);
+  const formatMoney = (amount) => {
+    return new Intl.NumberFormat("vi-VN").format(amount);
+  };
+
+  const addItemToCart = async () => {
+    try {
+      const response = await axiosInstance.post(
+        "cart/add",
+        {
+          cartId: props.cartId,
+          productId: props._id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+      dispatch(incrementCartCount());
+    } catch (error) {
+      console.error("Error adding item into cart:", error);
+    }
+  };
   const renderStars = (rating = 0) => {
     const fullStars = Math.floor(rating); // Number of full stars
     const halfStar = rating % 1 >= 0.5; // Check if there's a half star
@@ -68,18 +92,7 @@ const Product = (props) => {
         <div className="w-full h-30 absolute bg-white -bottom-[130px] group-hover:bottom-0 duration-700">
           <ul className="w-full h-full flex flex-col items-end justify-center gap-2 font-titleFont px-2 border-l border-r">
             <li
-              onClick={() =>
-                dispatch(
-                  addToCart({
-                    _id: props._id,
-                    name: props.productName,
-                    quantity: 1,
-                    image: props.img,
-                    des: props.des,
-                    price: props.price,
-                  })
-                )
-              }
+              onClick={addItemToCart}
               className="text-[#767676] hover:text-primeColor text-sm font-normal border-b-[1px] border-b-gray-200 hover:border-b-primeColor flex items-center justify-end gap-2 hover:cursor-pointer pb-1 duration-300 w-full"
             >
               Add to Cart
@@ -106,7 +119,9 @@ const Product = (props) => {
           <h2 className="text-lg text-primeColor font-bold">
             {props.productName}
           </h2>
-          <p className="text-[#767676] text-[14px]">{props.price} VND</p>
+          <p className="text-[#767676] text-[14px]">
+            {formatMoney(props.price)} VND
+          </p>
         </div>
         <div>
           <p className="text-[#767676] text-[14px]">{props.des}</p>

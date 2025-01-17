@@ -9,6 +9,17 @@ const Pagination = ({ itemsPerPage }) => {
   const [itemOffset, setItemOffset] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
   const [pageCount, setPageCount] = useState(0);
+  const [cartId, setCartId] = useState("");
+  const [loginUser, setLoginUser] = useState([]);
+
+  useEffect(() => {
+    // Check if customer is logged in
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (user && user.token) {
+      setCartId(user?.cartId);
+      setLoginUser(user);
+    }
+  });
   const [filters, setFilters] = useState({
     ProductName: "",
     CategoryId: 0,
@@ -93,6 +104,7 @@ const Pagination = ({ itemsPerPage }) => {
                 des={item.productDescription}
                 purchases={item.purchases}
                 ratingScore={item.ratingScore}
+                cartId={cartId}
               />
             </div>
           ))

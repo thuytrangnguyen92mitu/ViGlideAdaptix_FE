@@ -15,18 +15,24 @@ const HeaderBottom = () => {
   const navigate = useNavigate();
   const ref = useRef();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [cartId, setCartId] = useState("");
 
+  const [loginUser, setLoginUser] = useState([]);
   useEffect(() => {
     // Check if customer is logged in
     const user = JSON.parse(localStorage.getItem("loggedInUser"));
     if (user && user.token) {
+      setCartId(user?.cartId);
+      setLoginUser(user);
       setIsLoggedIn(true);
     }
 
     const handelStorageChange = () => {
       const newUser = JSON.parse(localStorage.getItem("loggedInUser"));
+
       if (!newUser || !newUser.token) {
         setIsLoggedIn(false);
+        setLoginUser();
         navigate("/signin");
       }
     };
@@ -66,6 +72,42 @@ const HeaderBottom = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showSearchBar, setShowSearchBar] = useState(false);
+
+  const [cartDetails, setCartDetails] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCartDetails = async () => {
+      if (cartId && loginUser.customerId) {
+        try {
+          const response = await axiosInstance.post(
+            "cart/get",
+            {
+              cartId: cartId,
+              customerId: loginUser.customerId,
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+            }
+          );
+          const cartItems = response.data.cart.cartItemsList;
+          setCartDetails(cartItems);
+          setCartCount(cartItems.length);
+          console.log("Cart Count:", cartItems.length);
+          console.log("Cart Details:", cartItems);
+        } catch (error) {
+          console.error("Error fetching cart details:", error);
+        }
+      }
+    };
+
+    if (cartId && loginUser.customerId) {
+      fetchCartDetails();
+    }
+  }, [cartId, loginUser.customerId]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -150,11 +192,12 @@ const HeaderBottom = () => {
                 )}
               </motion.ul>
             )}
+
             <Link to="/cart">
               <div className="relative">
                 <FaShoppingCart />
                 <span className="absolute font-titleFont top-3 -right-2 text-xs w-4 h-4 flex items-center justify-center rounded-full bg-primeColor text-white">
-                  {products.length > 0 ? products.length : 0}
+                  {cartCount}
                 </span>
               </div>
             </Link>
