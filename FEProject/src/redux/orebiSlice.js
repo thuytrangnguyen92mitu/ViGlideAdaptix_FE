@@ -3,56 +3,66 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   userInfo: [],
   products: [],
+  cartCount: 0, // Added cartCount to the initial state
 };
 
 export const orebiSlice = createSlice({
   name: "orebi",
   initialState,
   reducers: {
+    incrementCartCount: (state) => {
+      state.cartCount += 1;
+    },
+    setCartCount: (state, action) => {
+      state.cartCount = action.payload;
+    },
     addToCart: (state, action) => {
       const item = state.products.find(
-        (item) => item._id === action.payload._id
+        (item) => item.productId === action.payload.productId // Match by productId
       );
       if (item) {
-        item.quantity += action.payload.quantity;
+        item.quantity += action.payload.quantity; // Update quantity if item exists
       } else {
-        state.products.push(action.payload);
+        state.products.push(action.payload); // Add the new item
       }
     },
     increaseQuantity: (state, action) => {
       const item = state.products.find(
-        (item) => item._id === action.payload._id
+        (item) => item.cartItemId === action.payload.cartItemId // Match by cartItemId
       );
       if (item) {
-        item.quantity++;
+        item.quantity += 1; // Increase quantity by 1
       }
     },
-    drecreaseQuantity: (state, action) => {
+    decreaseQuantity: (state, action) => {
       const item = state.products.find(
-        (item) => item._id === action.payload._id
+        (item) => item.cartItemId === action.payload.cartItemId // Match by cartItemId
       );
-      if (item.quantity === 1) {
-        item.quantity = 1;
-      } else {
-        item.quantity--;
+      if (item && item.quantity > 1) {
+        item.quantity -= 1; // Decrease quantity by 1 if greater than 1
       }
     },
     deleteItem: (state, action) => {
       state.products = state.products.filter(
-        (item) => item._id !== action.payload
+        (item) => item.cartItemId !== action.payload.cartItemId // Remove item by cartItemId
       );
     },
     resetCart: (state) => {
-      state.products = [];
+      state.products = []; // Clear the cart
     },
   },
 });
 
+// Export the actions
 export const {
+  incrementCartCount,
+  setCartCount,
   addToCart,
   increaseQuantity,
-  drecreaseQuantity,
+  decreaseQuantity,
   deleteItem,
   resetCart,
 } = orebiSlice.actions;
+
+// Export the reducer
 export default orebiSlice.reducer;
