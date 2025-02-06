@@ -113,8 +113,9 @@ const SignIn = () => {
                 Get started fast with ViGlideAdaptix
               </span>
               <br />
-              Sign up today to explore our AI-integrated suspension systems that enhance your driving comfort and performance.
-              </p>
+              Sign up today to explore our AI-integrated suspension systems that
+              enhance your driving comfort and performance.
+            </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
             <span className="text-green-500 mt-1">
@@ -125,8 +126,9 @@ const SignIn = () => {
                 Access all our services
               </span>
               <br />
-              Create an account to unlock exclusive benefits, accumulate reward points, 
-              and receive early notifications on special promotions and offers tailored just for you!
+              Create an account to unlock exclusive benefits, accumulate reward
+              points, and receive early notifications on special promotions and
+              offers tailored just for you!
             </p>
           </div>
           <div className="w-[300px] flex items-start gap-3">
@@ -138,8 +140,9 @@ const SignIn = () => {
                 Trusted by online Shoppers
               </span>
               <br />
-              Join thousands of satisfied customers who trust ViGlideAdaptix
-              for innovative suspension solutions and enjoy a smooth, secure shopping experience.
+              Join thousands of satisfied customers who trust ViGlideAdaptix for
+              innovative suspension solutions and enjoy a smooth, secure
+              shopping experience.
             </p>
           </div>
           <div className="flex items-center justify-between mt-10">
@@ -215,7 +218,7 @@ const SignIn = () => {
                     value={password}
                     className="w-full h-8 placeholder:text-sm placeholder:tracking-wide px-4 text-base font-medium placeholder:font-normal rounded-md border-[1px] border-gray-400 outline-none"
                     type="password"
-                    placeholder="Create password"
+                    placeholder="Your password"
                   />
                   {errPassword && (
                     <p className="text-sm text-red-500 font-titleFont font-semibold px-4">

@@ -34,40 +34,41 @@ const Footer = () => {
           <FooterListTitle title=" More about ViGlide Apdaptix" />
           <div className="flex flex-col gap-6">
             <p className="text-base w-full xl:w-[80%]">
-            The innovator and developer delivers an unparalleled experience on every journey of your life.
+              The innovator and developer delivers an unparalleled experience on
+              every journey of your life.
             </p>
             <ul className="flex items-center gap-2">
               <a
-                // href="https://www.youtube.com/@reactjsBD"
-                // target="_blank"
-                // rel="noreferrer"
+              // href="https://www.youtube.com/@reactjsBD"
+              // target="_blank"
+              // rel="noreferrer"
               >
                 <li className="w-7 h-7 bg-primeColor text-gray-100 hover:text-white cursor-pointer text-lg rounded-full flex justify-center items-center hover:bg-black duration-300">
                   <FaYoutube />
                 </li>
               </a>
               <a
-                // href="https://github.com/noorjsdivs"
-                // target="_blank"
-                // rel="noreferrer"
+              // href="https://github.com/noorjsdivs"
+              // target="_blank"
+              // rel="noreferrer"
               >
                 <li className="w-7 h-7 bg-primeColor text-gray-100 hover:text-white cursor-pointer text-lg rounded-full flex justify-center items-center hover:bg-black duration-300">
                   <FaGithub />
                 </li>
               </a>
               <a
-                // href="https://www.facebook.com/Noorlalu143/"
-                // target="_blank"
-                // rel="noreferrer"
+              // href="https://www.facebook.com/Noorlalu143/"
+              // target="_blank"
+              // rel="noreferrer"
               >
                 <li className="w-7 h-7 bg-primeColor text-gray-100 hover:text-white cursor-pointer text-lg rounded-full flex justify-center items-center hover:bg-black duration-300">
                   <FaFacebook />
                 </li>
               </a>
               <a
-                // href="https://www.linkedin.com/in/noor-mohammad-ab2245193/"
-                // target="_blank"
-                // rel="noreferrer"
+              // href="https://www.linkedin.com/in/noor-mohammad-ab2245193/"
+              // target="_blank"
+              // rel="noreferrer"
               >
                 <li className="w-7 h-7 bg-primeColor text-gray-100 hover:text-white cursor-pointer text-lg rounded-full flex justify-center items-center hover:bg-black duration-300">
                   <FaLinkedin />
@@ -117,7 +118,9 @@ const Footer = () => {
           <FooterListTitle title="Subscribe to our newsletter." />
           <div className="w-full">
             <p className="text-center mb-4">
-            Stay updated with the latest news, offers, and updates by subscribing to our newsletter.            </p>
+              Stay updated with the latest news, offers, and updates by
+              subscribing to our newsletter.{" "}
+            </p>
             {subscription ? (
               <motion.p
                 initial={{ x: 20, opacity: 0 }}
@@ -152,12 +155,12 @@ const Footer = () => {
               </div>
             )}
 
-            <Image
+            {/* <Image
               className={`w-[80%] lg:w-[60%] mx-auto ${
                 subscription ? "mt-2" : "mt-6"
               }`}
               imgSrc={paymentCard}
-            />
+            /> */}
           </div>
         </div>
       </div>

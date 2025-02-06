@@ -1,55 +1,81 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import Heading from "../Products/Heading";
 import Product from "../Products/Product";
-import {
-  bestSellerOne,
-  bestSellerTwo,
-  bestSellerThree,
-  bestSellerFour,
-} from "../../../assets/images/index";
+import axiosInstance from "../../../utils/axiosInstance";
 
 const BestSellers = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+      setUser(loggedInUser);
+      const response = await axiosInstance.get("product/bestSeller");
+      const productData = response.data;
+
+      const promises = productData.map(async (product) => {
+        try {
+          const imageResponse = await axiosInstance.get(
+            `product/images?imageName=${product.productImage}`
+          );
+          const imgSrc = imageResponse.data.image;
+          return {
+            productId: product.productId,
+            productImage: imgSrc,
+            productName: product.productName,
+            unitPrice: product.unitPrice,
+            purchases: product.purchases,
+            ratingScore: product.ratingScore,
+            productDescription: product.productDescription,
+          };
+        } catch (error) {
+          console.error(
+            "Error fetching image for product:",
+            product.productId,
+            error
+          );
+          return { ...product, imgSrc: "" }; // Return product with empty image on failure
+        }
+      });
+
+      const mappedProducts = await Promise.all(promises);
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   return (
     <div className="w-full pb-20">
       <Heading heading="Our Bestsellers" />
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lgl:grid-cols-3 xl:grid-cols-4 gap-10">
-        <Product
-          _id="1011"
-          img={bestSellerOne}
-          productName="Flower Base"
-          price="35.00"
-          color="Blank and White"
-          badge={true}
-          des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-        />
-        <Product
-          _id="1012"
-          img={bestSellerTwo}
-          productName="New Backpack"
-          price="180.00"
-          color="Gray"
-          badge={false}
-          des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-        />
-        <Product
-          _id="1013"
-          img={bestSellerThree}
-          productName="Household materials"
-          price="25.00"
-          color="Mixed"
-          badge={true}
-          des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-        />
-        <Product
-          _id="1014"
-          img={bestSellerFour}
-          productName="Travel Bag"
-          price="220.00"
-          color="Black"
-          badge={false}
-          des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-        />
-      </div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {products.slice(0, 4).map((product) => (
+            <div key={product.productId} className="px-2">
+              <Product
+                _id={product.productId}
+                img={product.productImage}
+                productName={product.productName}
+                price={product.unitPrice}
+                purchases={product.purchases}
+                ratingScore={product.ratingScore}
+                cartId={user ? user.cartId : null} // Kiểm tra giá trị user trước khi truy cập cartId
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

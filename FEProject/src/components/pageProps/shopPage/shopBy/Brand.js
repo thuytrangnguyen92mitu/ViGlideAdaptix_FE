@@ -1,62 +1,59 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
 import NavTitle from "./NavTitle";
+import axiosInstance from "../../../../utils/axiosInstance";
 
-const Brand = () => {
-  const [showBrands, setShowBrands] = useState(true);
-  const brands = [
-    {
-      _id: 9006,
-      title: "Vinfast",
-    },
-    {
-      _id: 9007,
-      title: "Toyota",
-    },
-    {
-      _id: 9008,
-      title: "Huyndai",
-    },
-    {
-      _id: 9009,
-      title: "Kia",
-    },
-    {
-      _id: 9010,
-      title: "Suzuki",
-    },
-    {
-      _id: 9011,
-      title: "Others",
-    },
-  ];
+const Brand = ({ onBrandSelect }) => {
+  const [brands, setBrands] = useState([]);
+  const [selectedBrand, setSelectedBrand] = useState(null);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = await axiosInstance.get("product/brand", {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        });
+        setBrands(response.data);
+      } catch (error) {
+        console.error("Error fetching brands:", error);
+      }
+    };
+
+    fetchBrands();
+  }, []);
+
+  const handleBrandClick = (brandId) => {
+    if (selectedBrand === brandId) {
+      setSelectedBrand(null); // Deselect if already selected
+      onBrandSelect(null); // Notify parent that no brand is selected
+    } else {
+      setSelectedBrand(brandId); // Select new brand
+      onBrandSelect(brandId); // Pass selected brand ID to parent
+    }
+  };
 
   return (
     <div>
-      <div
-        onClick={() => setShowBrands(!showBrands)}
-        className="cursor-pointer"
-      >
-        <NavTitle title="Shop by Brand" icons={true} />
+      <div className="cursor-pointer">
+        <NavTitle title="Shop by Brand" />
+        <ul className="flex flex-col gap-4 text-sm lg:text-base text-[#767676]">
+          {brands.map((item) => (
+            <li
+              key={item.brandId}
+              onClick={() => handleBrandClick(item.brandId)}
+              className={`border-b-[1px] border-b-[#F0F0F0] pb-2 flex items-center gap-2 ${
+                selectedBrand === item.brandId
+                  ? "font-bold text-black"
+                  : "hover:text-primeColor hover:border-gray-400 duration-300"
+              }`}
+            >
+              {item.brandName}
+            </li>
+          ))}
+        </ul>
       </div>
-      {showBrands && (
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <ul className="flex flex-col gap-4 text-sm lg:text-base text-[#767676]">
-            {brands.map((item) => (
-              <li
-                key={item._id}
-                className="border-b-[1px] border-b-[#F0F0F0] pb-2 flex items-center gap-2 hover:text-primeColor hover:border-gray-400 duration-300"
-              >
-                {item.title}
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-      )}
     </div>
   );
 };
