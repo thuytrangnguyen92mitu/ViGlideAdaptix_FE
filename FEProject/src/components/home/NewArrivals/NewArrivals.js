@@ -1,17 +1,60 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
 import Heading from "../Products/Heading";
 import Product from "../Products/Product";
-import {
-  newArrOne,
-  newArrTwo,
-  newArrThree,
-  newArrFour,
-} from "../../../assets/images/index";
 import SampleNextArrow from "./SampleNextArrow";
 import SamplePrevArrow from "./SamplePrevArrow";
+import axiosInstance from "../../../utils/axiosInstance";
 
 const NewArrivals = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+      setUser(loggedInUser);
+      const response = await axiosInstance.get("product/newArrival");
+      const productData = response.data;
+
+      const promises = productData.map(async (product) => {
+        try {
+          const imageResponse = await axiosInstance.get(
+            `product/images?imageName=${product.productImage}`
+          );
+          const imgSrc = imageResponse.data.image;
+          return {
+            productId: product.productId,
+            productImage: imgSrc,
+            productName: product.productName,
+            unitPrice: product.unitPrice,
+            productDescription: product.productDescription,
+          };
+        } catch (error) {
+          console.error(
+            "Error fetching image for product:",
+            product.productId,
+            error
+          );
+          return { ...product, imgSrc: "" }; // Return product with empty image on failure
+        }
+      });
+
+      const mappedProducts = await Promise.all(promises);
+      setProducts(mappedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   const settings = {
     infinite: true,
     speed: 500,
@@ -46,66 +89,30 @@ const NewArrivals = () => {
       },
     ],
   };
+
   return (
     <div className="w-full pb-16">
       <Heading heading="New Arrivals" />
-      <Slider {...settings}>
-        <div className="px-2">
-          <Product
-            _id="100001"
-            img={newArrOne}
-            productName="Round Table Clock"
-            price="44.00"
-            color="Black"
-            badge={true}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-        <div className="px-2">
-          <Product
-            _id="100002"
-            img={newArrTwo}
-            productName="Smart Watch"
-            price="250.00"
-            color="Black"
-            badge={true}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-        <div className="px-2">
-          <Product
-            _id="100003"
-            img={newArrThree}
-            productName="cloth Basket"
-            price="80.00"
-            color="Mixed"
-            badge={true}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-        <div className="px-2">
-          <Product
-            _id="100004"
-            img={newArrFour}
-            productName="Funny toys for babies"
-            price="60.00"
-            color="Mixed"
-            badge={false}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-        <div className="px-2">
-          <Product
-            _id="100005"
-            img={newArrTwo}
-            productName="Funny toys for babies"
-            price="60.00"
-            color="Mixed"
-            badge={false}
-            des="Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic excepturi quibusdam odio deleniti reprehenderit facilis."
-          />
-        </div>
-      </Slider>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <Slider {...settings}>
+          {products.map((product) => (
+            <div key={product.productId} className="px-2">
+              <Product
+                _id={product.productId}
+                img={product.productImage}
+                productName={product.productName}
+                price={product.unitPrice}
+                des={product.productDescription}
+                purchases={product.purchases}
+                ratingScore={product.ratingScore}
+                cartId={user ? user.cartId : null} // Kiểm tra giá trị user trước khi truy cập cartId
+              />
+            </div>
+          ))}
+        </Slider>
+      )}
     </div>
   );
 };
