@@ -30,6 +30,15 @@ const Product = (props) => {
   };
 
   const addItemToCart = async () => {
+    // Check if the user is logged in
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!user || !user.token) {
+      // Alert the user and redirect to the sign-in page
+      alert("You need to sign in to add products to your cart.");
+      navigate("/signin");
+      return;
+    }
+
     try {
       const response = await axiosInstance.post(
         "cart/add",
@@ -44,7 +53,7 @@ const Product = (props) => {
           },
         }
       );
-      dispatch(incrementCartCount());
+      navigate(0);
     } catch (error) {
       console.error("Error adding item into cart:", error);
     }
