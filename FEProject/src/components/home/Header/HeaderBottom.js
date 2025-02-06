@@ -1,28 +1,32 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { HiOutlineMenuAlt4 } from "react-icons/hi";
 import { FaSearch, FaUser, FaCaretDown, FaShoppingCart } from "react-icons/fa";
-import Flex from "../../designLayouts/Flex";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { paginationItems } from "../../../constants";
 import axiosInstance from "../../../utils/axiosInstance";
+
+// Import useNavigate from react-router-dom
+import { useNavigate } from "react-router-dom";
+
 const HeaderBottom = () => {
-  const products = useSelector((state) => state.orebiReducer.products);
-  const [show, setShow] = useState(false);
+  // const products = useSelector((state) => state.orebiReducer.products);
   const [showUser, setShowUser] = useState(false);
   const [categories, setCategories] = useState([]); // State for categories
   const navigate = useNavigate();
-  const ref = useRef();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartId, setCartId] = useState("");
-
   const [loginUser, setLoginUser] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [cartDetails, setCartDetails] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+
   useEffect(() => {
     // Check if customer is logged in
     const user = JSON.parse(localStorage.getItem("loggedInUser"));
     if (user && user.token) {
-      setCartId(user?.cartId);
+      setCartId(user.cartId);
       setLoginUser(user);
       setIsLoggedIn(true);
     }
@@ -66,52 +70,50 @@ const HeaderBottom = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("expirationTime");
     setIsLoggedIn(false);
-    window.location.reload(); // Reload the page to update UI
+    navigate(0);
   };
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [showSearchBar, setShowSearchBar] = useState(false);
+  // Define fetchCartDetails outside useEffect
+  const fetchCartDetails = async (newCartId, customerId) => {
+    try {
+      const response = await axiosInstance.post(
+        "cart/get",
+        { cartId: newCartId, customerId: customerId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
 
-  const [cartDetails, setCartDetails] = useState([]);
-  const [cartCount, setCartCount] = useState(0);
+      const cartItems = response.data.cart.cartItemsList;
+      setCartDetails(cartItems);
+      setCartCount(cartItems.length);
+    } catch (error) {
+      console.error("Error fetching updated cart:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchCartDetails = async () => {
-      if (cartId && loginUser.customerId) {
-        try {
-          const response = await axiosInstance.post(
-            "cart/get",
-            {
-              cartId: cartId,
-              customerId: loginUser.customerId,
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-              },
-            }
-          );
-          const cartItems = response.data.cart.cartItemsList;
-          setCartDetails(cartItems);
-          setCartCount(cartItems.length);
-          console.log("Cart Count:", cartItems.length);
-          console.log("Cart Details:", cartItems);
-        } catch (error) {
-          console.error("Error fetching cart details:", error);
-        }
-      }
-    };
-
     if (cartId && loginUser.customerId) {
-      fetchCartDetails();
+      fetchCartDetails(cartId, loginUser.customerId);
     }
   }, [cartId, loginUser.customerId]);
 
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value);
-  };
+  useEffect(() => {
+    const handleUpdateCart = () => {
+      const user = JSON.parse(localStorage.getItem("loggedInUser"));
+      if (user && user.customerId) {
+        fetchCartDetails(user.cartId, user.customerId);
+      }
+    };
+
+    window.addEventListener("updateCart", handleUpdateCart);
+    return () => {
+      window.removeEventListener("updateCart", handleUpdateCart);
+    };
+  }, []);
 
   useEffect(() => {
     const filtered = paginationItems.filter((item) =>
@@ -123,35 +125,13 @@ const HeaderBottom = () => {
   return (
     <div className="w-full bg-[#F5F5F3] relative">
       <div className="max-w-container mx-auto">
-        <Flex className="flex flex-col lg:flex-row items-start lg:items-center justify-between w-full px-4 pb-4 lg:pb-0 h-full lg:h-24">
-          <div
-            onClick={() => setShow(!show)}
-            ref={ref}
-            className="flex h-14 cursor-pointer items-center gap-2 text-primeColor"
-          >
-            <HiOutlineMenuAlt4 className="w-5 h-5" />
-            <p className="text-[14px] font-normal">Shop by Category</p>
-
-            {show && (
-              <motion.ul
-                initial={{ y: 30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="absolute top-36 z-50 bg-primeColor w-auto text-[#767676] h-auto p-4 pb-6"
-              >
-                {categories.map((category) => (
-                  <li
-                    key={category.categoryId}
-                    className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer"
-                  >
-                    {category.categoryName}
-                  </li>
-                ))}
-              </motion.ul>
-            )}
-          </div>
-          <div className="flex gap-4 mt-2 lg:mt-0 items-center pr-6 cursor-pointer relative">
-            <div onClick={() => setShowUser(!showUser)} className="flex">
+        <div className="flex flex-row items-center justify-end w-full px-4 h-24">
+          {/* User Dropdown */}
+          <div className="relative flex gap-4 cursor-pointer">
+            <div
+              onClick={() => setShowUser(!showUser)}
+              className="flex items-center gap-1"
+            >
               <FaUser />
               <FaCaretDown />
             </div>
@@ -165,13 +145,13 @@ const HeaderBottom = () => {
                 {isLoggedIn ? (
                   <>
                     <Link to="/profile">
-                      <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
+                      <li className="text-gray-400 px-4 py-1 border-b border-gray-400 hover:border-white hover:text-white duration-300 cursor-pointer">
                         Profile
                       </li>
                     </Link>
                     <li
                       onClick={handleLogout}
-                      className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer"
+                      className="text-gray-400 px-4 py-1 border-b border-gray-400 hover:border-white hover:text-white duration-300 cursor-pointer"
                     >
                       Sign Out
                     </li>
@@ -179,13 +159,13 @@ const HeaderBottom = () => {
                 ) : (
                   <>
                     <Link to="/signin">
-                      <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
-                        SignIn
+                      <li className="text-gray-400 px-4 py-1 border-b border-gray-400 hover:border-white hover:text-white duration-300 cursor-pointer">
+                        Sign In
                       </li>
                     </Link>
                     <Link to="/signup">
-                      <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
-                        SignUp
+                      <li className="text-gray-400 px-4 py-1 border-b border-gray-400 hover:border-white hover:text-white duration-300 cursor-pointer">
+                        Sign Up
                       </li>
                     </Link>
                   </>
@@ -193,6 +173,7 @@ const HeaderBottom = () => {
               </motion.ul>
             )}
 
+            {/* Cart Icon */}
             <Link to="/cart">
               <div className="relative">
                 <FaShoppingCart />
@@ -202,7 +183,7 @@ const HeaderBottom = () => {
               </div>
             </Link>
           </div>
-        </Flex>
+        </div>
       </div>
     </div>
   );
