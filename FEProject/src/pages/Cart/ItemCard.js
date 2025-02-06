@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { ImCross } from "react-icons/im";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 import {
   deleteItem,
   drecreaseQuantity,
@@ -12,6 +14,7 @@ const ItemCard = ({ cartDetail }) => {
   const dispatch = useDispatch();
   const [product, setProduct] = useState(null); // Single product object
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Fetch product details when the component mounts or cartDetail changes
   useEffect(() => {
@@ -54,7 +57,7 @@ const ItemCard = ({ cartDetail }) => {
         }
       );
       if (response.status === 200) {
-        window.location.reload();
+        navigate(0);
       }
     } catch (error) {
       console.error("Error adding item from cart ", error);
@@ -79,7 +82,7 @@ const ItemCard = ({ cartDetail }) => {
       );
       if (response.status === 200) {
         // After successful removal, dispatch the decreaseQuantity action with the correct cartItemId
-        window.location.reload();
+        navigate(0);
       }
     } catch (error) {
       console.error("Error removing item from cart:", error);
@@ -93,7 +96,7 @@ const ItemCard = ({ cartDetail }) => {
         params: { cartId },
       });
       if (response.status === 200) {
-        window.location.reload();
+        navigate(0);
       }
     } catch (error) {
       console.error("Error to clear cart", error);
