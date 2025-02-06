@@ -16,13 +16,13 @@ axiosInstance.interceptors.request.use(
     const expirationTime = localStorage.getItem("expirationTime");
 
     // Kiểm tra nếu không phải đang ở trang login và có token
-    if (config.url !== "/login" && token) {
+    if (config.url !== "/signin" && token) {
       if (new Date().getTime() > expirationTime) {
         localStorage.clear();
         if (
           window.confirm("Your session has expired. Click OK to log in again.")
         ) {
-          window.location.href = "/login"; // Chuyển hướng người dùng về trang login
+          window.location.href = "/singin";
         }
       } else {
         config.headers.Authorization = `Bearer ${token}`;
