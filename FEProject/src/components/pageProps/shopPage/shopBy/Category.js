@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import NavTitle from "./NavTitle";
 import axiosInstance from "../../../../utils/axiosInstance";
 
-const Category = () => {
+const Category = ({ onCategorySelect }) => {
   const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
-    // Fetch categories from the API
     const fetchCategories = async () => {
       try {
         const response = await axiosInstance.get("product/category", {
@@ -15,7 +15,7 @@ const Category = () => {
             Accept: "application/json",
           },
         });
-        setCategories(response.data); // Assuming the API returns an array of categories
+        setCategories(response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -23,6 +23,16 @@ const Category = () => {
 
     fetchCategories();
   }, []);
+
+  const handleCategoryClick = (categoryId) => {
+    if (selectedCategory === categoryId) {
+      setSelectedCategory(null); // Deselect if already selected
+      onCategorySelect(null); // Notify parent that no category is selected
+    } else {
+      setSelectedCategory(categoryId); // Select new category
+      onCategorySelect(categoryId); // Pass selected category ID to parent
+    }
+  };
 
   return (
     <div className="w-full">
@@ -32,7 +42,12 @@ const Category = () => {
           {categories.map(({ categoryId, categoryName }) => (
             <li
               key={categoryId}
-              className="border-b-[1px] border-b-[#F0F0F0] pb-2 flex items-center justify-between"
+              onClick={() => handleCategoryClick(categoryId)}
+              className={`border-b-[1px] border-b-[#F0F0F0] pb-2 flex items-center justify-between ${
+                selectedCategory === categoryId
+                  ? "font-bold text-black"
+                  : "hover:text-primeColor hover:border-gray-400 duration-300"
+              }`}
             >
               {categoryName}
             </li>
