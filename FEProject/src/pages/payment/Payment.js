@@ -82,7 +82,7 @@ const Payment = () => {
 
       // Save new cartId in localStorage
       let user = JSON.parse(localStorage.getItem("loggedInUser"));
-      user.cartId = newCartId;
+      // user.cartId = newCartId;
       localStorage.setItem("loggedInUser", JSON.stringify(user));
 
       window.dispatchEvent(new Event("updateCart"));
@@ -108,12 +108,13 @@ const Payment = () => {
         // First, retrieve the public IP address
         const ipResponse = await fetch("https://checkip.amazonaws.com");
         const publicIp = (await ipResponse.text()).trim(); // Extract the IP address from the response
+        console.log(publicIp);
 
         const paymentRequest = {
           method: "vnpay",
           amount: formData.totalPrice,
-          extraData: "Order from ViGlide Adaptix",
-          orderInfo: `Order for ${formData.customerName}`,
+          extraData: "Order_from_ViGlideAdaptix",
+          orderInfo: `Order_for_${formData.customerName}`,
           clientIp: publicIp,
         };
 
