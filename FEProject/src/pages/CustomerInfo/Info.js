@@ -148,10 +148,59 @@ const UpdateProfile = () => {
           <Link to="/">
             <img src={logoLight} alt="logoImg" className="w-28" />
           </Link>
-          <div className="flex items-center justify-between mt-10">
-            <p className="text-sm font-titleFont font-semibold text-gray-300 hover:text-white cursor-pointer duration-300">
-              © ViglideAdaptix
+          <div className="flex flex-col gap-1 -mt-1">
+            <h1 className="font-titleFont text-xl font-medium">
+              Stay sign in for more
+            </h1>
+            <p className="text-base">When you sign in, you are with us!</p>
+          </div>
+          <div className="w-[300px] flex items-start gap-3">
+            <span className="text-green-500 mt-1">
+              <BsCheckCircleFill />
+            </span>
+            <p className="text-base text-gray-300">
+              <span className="text-white font-semibold font-titleFont">
+                Get started fast with ViGlideAdaptix
+              </span>
+              <br />
+              Sign up today to explore our AI-integrated suspension systems that
+              enhance your driving comfort and performance.
             </p>
+          </div>
+          <div className="w-[300px] flex items-start gap-3">
+            <span className="text-green-500 mt-1">
+              <BsCheckCircleFill />
+            </span>
+            <p className="text-base text-gray-300">
+              <span className="text-white font-semibold font-titleFont">
+                Access all our services
+              </span>
+              <br />
+              Create an account to unlock exclusive benefits, accumulate reward
+              points, and receive early notifications on special promotions and
+              offers tailored just for you!
+            </p>
+          </div>
+          <div className="w-[300px] flex items-start gap-3">
+            <span className="text-green-500 mt-1">
+              <BsCheckCircleFill />
+            </span>
+            <p className="text-base text-gray-300">
+              <span className="text-white font-semibold font-titleFont">
+                Trusted by online Shoppers
+              </span>
+              <br />
+              Join thousands of satisfied customers who trust ViGlideAdaptix for
+              innovative suspension solutions and enjoy a smooth, secure
+              shopping experience.
+            </p>
+          </div>
+          <div className="flex items-center justify-between mt-10">
+            <Link to="/">
+              <p className="text-sm font-titleFont font-semibold text-gray-300 hover:text-white cursor-pointer duration-300">
+                © VIGLIDEADAPTIX
+              </p>
+            </Link>
             <p className="text-sm font-titleFont font-semibold text-gray-300 hover:text-white cursor-pointer duration-300">
               Terms
             </p>
