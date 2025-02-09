@@ -82,7 +82,7 @@ const Payment = () => {
 
       // Save new cartId in localStorage
       let user = JSON.parse(localStorage.getItem("loggedInUser"));
-      // user.cartId = newCartId;
+       user.cartId = newCartId;
       localStorage.setItem("loggedInUser", JSON.stringify(user));
 
       window.dispatchEvent(new Event("updateCart"));
