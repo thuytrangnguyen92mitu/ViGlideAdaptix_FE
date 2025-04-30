@@ -79,3 +79,6 @@ stylelintcache
 
 # Test output
 jest-test-results.json
+
+# Local Netlify folder
+.netlify
