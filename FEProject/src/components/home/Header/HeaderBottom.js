@@ -1,53 +1,108 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaSearch, FaUser, FaCaretDown, FaShoppingCart } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { paginationItems } from "../../../constants";
 import axiosInstance from "../../../utils/axiosInstance";
 
-// Import useNavigate from react-router-dom
-import { useNavigate } from "react-router-dom";
-
 const HeaderBottom = () => {
-  // const products = useSelector((state) => state.orebiReducer.products);
   const [showUser, setShowUser] = useState(false);
-  const [categories, setCategories] = useState([]); // State for categories
+  const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartId, setCartId] = useState("");
-  const [loginUser, setLoginUser] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [loginUser, setLoginUser] = useState(null);
   const [cartDetails, setCartDetails] = useState([]);
   const [cartCount, setCartCount] = useState(0);
 
-  useEffect(() => {
-    // Check if customer is logged in
+  // Helper function: update user from localStorage and fetch cart details.
+  const updateUserFromLocalStorage = () => {
     const user = JSON.parse(localStorage.getItem("loggedInUser"));
-    if (user && user.token) {
+    console.log("Updating user from localStorage:", user);
+    if (user && user.token && user.customerId) {
       setCartId(user.cartId);
       setLoginUser(user);
       setIsLoggedIn(true);
+      fetchCartDetails(user.cartId, user.customerId);
     }
+  };
 
-    const handelStorageChange = () => {
-      const newUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  // Fetch cart details from the API.
+  const fetchCartDetails = async (currentCartId, customerId) => {
+    try {
+      const response = await axiosInstance.post(
+        "cart/get",
+        { cartId: currentCartId, customerId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+      const cartItems = response.data.cart.cartItemsList;
+      setCartDetails(cartItems);
+      setCartCount(cartItems.length);
+      console.log("Fetched cart details for cartId:", currentCartId);
+    } catch (error) {
+      console.error("Error fetching updated cart:", error);
+    }
+  };
 
-      if (!newUser || !newUser.token) {
-        setIsLoggedIn(false);
-        setLoginUser();
-        navigate("/signin");
-      }
+  // On mount, update user from localStorage.
+  useEffect(() => {
+    updateUserFromLocalStorage();
+  }, []);
+
+  // Listen for the custom "updateCart" event.
+  useEffect(() => {
+    const handleUpdateCart = () => {
+      console.log("Received updateCart event");
+      updateUserFromLocalStorage();
     };
-    window.addEventListener("storage", handelStorageChange);
+    window.addEventListener("updateCart", handleUpdateCart);
     return () => {
-      window.removeEventListener("storage", handelStorageChange);
+      window.removeEventListener("updateCart", handleUpdateCart);
+    };
+  }, []);
+
+  // Listen for the window "focus" event.
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log("Window regained focus");
+      updateUserFromLocalStorage();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
+
+  // Listen for the "pageshow" event (to catch navigation from bfcache).
+  useEffect(() => {
+    const handlePageShow = (event) => {
+      console.log("pageshow event fired", event.persisted);
+      updateUserFromLocalStorage();
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, []);
+
+  // Listen for storage events from other tabs.
+  useEffect(() => {
+    const handleStorageChange = () => {
+      updateUserFromLocalStorage();
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [navigate]);
 
+  // (Optional) Fetch categories if used for navigation.
   useEffect(() => {
-    // Fetch categories from the API
     const fetchCategories = async () => {
       try {
         const response = await axiosInstance.get("product/category", {
@@ -56,12 +111,11 @@ const HeaderBottom = () => {
             Accept: "application/json",
           },
         });
-        setCategories(response.data); // Assuming the API returns an array of categories
+        setCategories(response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     };
-
     fetchCategories();
   }, []);
 
@@ -72,55 +126,6 @@ const HeaderBottom = () => {
     setIsLoggedIn(false);
     navigate(0);
   };
-
-  // Define fetchCartDetails outside useEffect
-  const fetchCartDetails = async (newCartId, customerId) => {
-    try {
-      const response = await axiosInstance.post(
-        "cart/get",
-        { cartId: newCartId, customerId: customerId },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        }
-      );
-
-      const cartItems = response.data.cart.cartItemsList;
-      setCartDetails(cartItems);
-      setCartCount(cartItems.length);
-    } catch (error) {
-      console.error("Error fetching updated cart:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (cartId && loginUser.customerId) {
-      fetchCartDetails(cartId, loginUser.customerId);
-    }
-  }, [cartId, loginUser.customerId]);
-
-  useEffect(() => {
-    const handleUpdateCart = () => {
-      const user = JSON.parse(localStorage.getItem("loggedInUser"));
-      if (user && user.customerId) {
-        fetchCartDetails(user.cartId, user.customerId);
-      }
-    };
-
-    window.addEventListener("updateCart", handleUpdateCart);
-    return () => {
-      window.removeEventListener("updateCart", handleUpdateCart);
-    };
-  }, []);
-
-  useEffect(() => {
-    const filtered = paginationItems.filter((item) =>
-      item.productName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredProducts(filtered);
-  }, [searchQuery]);
 
   return (
     <div className="w-full bg-[#F5F5F3] relative">
@@ -172,7 +177,6 @@ const HeaderBottom = () => {
                 )}
               </motion.ul>
             )}
-
             {/* Cart Icon */}
             <Link to="/cart">
               <div className="relative">
