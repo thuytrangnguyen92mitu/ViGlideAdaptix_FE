@@ -1,4 +1,4 @@
- # ============ ViGlideAdaptix_Front-end Project ============
+ # ===== ViGlideAdaptix_Front-end Project =====
 
 ##👥 Members
 
